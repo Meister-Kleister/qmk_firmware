@@ -124,7 +124,7 @@ In addition to not encountering unexpected bugs on macOS, you can also change th
 ## Advanced Examples
 ### Modifiers as Layer Keys
 
-Do you really need a dedicated key to toggle your fn layer? With key overrides, perhaps not. This example shows how you can configure to use `rGUI` + `rAlt` (right GUI and right alt) to access a momentary layer like an fn layer. With this you completely eliminate the need to use a dedicated layer key. Of course the choice of modifier keys can be changed as needed, `rGUI` + `rAlt` is just an example here. 
+Do you really need a dedicated key to toggle your fn layer? With key overrides, perhaps not. This example shows how you can configure to use `rGUI` + `rALT` (right GUI and right alt) to access a momentary layer like an fn layer. With this you completely eliminate the need to use a dedicated layer key. Of course the choice of modifier keys can be changed as needed, `rGUI` + `rALT` is just an example here. 
 
 ```c
 // This is called when the override activates and deactivates. Enable the fn layer on activation and disable on deactivation
@@ -138,16 +138,21 @@ bool momentary_layer(bool key_down, void *layer) {
     return false;
 }
 
-const key_override_t fn_override = {.trigger_mods          = MOD_BIT(KC_RGUI) | MOD_BIT(KC_RCTL),                       //
+const key_override_t fn_override = {.trigger_mods          = MOD_BIT(KC_RGUI) | MOD_BIT(KC_RALT),                       //Both RGUI AND RALT need to be pressed to activate
                                    .layers                 = ~(1 << LAYER_FN),                                          //
-                                   .suppressed_mods        = MOD_BIT(KC_RGUI) | MOD_BIT(KC_RCTL),                       //
-                                   .options                = ko_option_no_unregister_on_other_key_down,                 //
-                                   .negative_mod_mask      = (uint8_t) ~(MOD_BIT(KC_RGUI) | MOD_BIT(KC_RCTL)),          //
+                                   .suppressed_mods        = MOD_BIT(KC_RGUI) | MOD_BIT(KC_RALT),                       //OS does not register RGUI and RALT as being pressed
+                                   .options                = ko_option_no_unregister_on_other_key_down,                 //Won't deactivate if further keys are being pressed
+                                   .negative_mod_mask      = (uint8_t) ~(MOD_BIT(KC_RGUI) | MOD_BIT(KC_RALT)),          //
                                    .custom_action          = momentary_layer,                                           //
                                    .context                = (void *)LAYER_FN,                                          //
-                                   .trigger                = KC_NO,                                                     //
-                                   .replacement            = KC_NO,                                                     //
+                                   .trigger                = KC_NO,                                                     //No other key needs to be pressed to activate it
+                                   .replacement            = KC_NO,                                                     //No keypress is being registered as replacement
                                    .enabled                = NULL};
+                                   
+const key_override_t **key_overrides = (const key_override_t *[]){
+	&fn_override,
+	NULL
+};
 ```
 
 ## Keycodes 
